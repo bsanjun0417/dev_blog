@@ -6,10 +6,10 @@
  * /posts 와 /posts/page/:n 에서 공유한다.
  *
  * 레이아웃 구성 (데스크톱 기준):
- *  ┌──────────────┬──────────────────────┬──────────────┐
- *  │ 카테고리 패널 │     게시글 목록       │ Recent Tags  │
- *  │ (사이드바)    │  + 페이지네이션       │ (사이드바)    │
- *  └──────────────┴──────────────────────┴──────────────┘
+ *  ┌──────────────┬──────────────────────┐
+ *  │ 카테고리      │     게시글 목록       │
+ *  │ Recent Tags  │  + 페이지네이션       │
+ *  └──────────────┴──────────────────────┘
  *
  * 모바일에서는 카테고리 패널이 팝업 드롭다운으로 변환된다.
  */
@@ -125,6 +125,14 @@ const openCategoryIndex = Math.max(
         }
       </div>
     </div>
+
+    {/* 카테고리 아래에 최근 태그를 함께 배치한다. */}
+    <aside class="recent-tags-sidebar" aria-labelledby="recent-tags-heading">
+      <h2 id="recent-tags-heading">Recent Tags</h2>
+      <div class="recent-tag-cloud">
+        {recentTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
+      </div>
+    </aside>
   </section>
 
   {/* ── 게시글 목록 ── */}
@@ -168,13 +176,6 @@ const openCategoryIndex = Math.max(
     }
   </nav>
 
-  {/* ── Recent Tags 사이드바 ── */}
-  <aside class="recent-tags-sidebar" aria-labelledby="recent-tags-heading">
-    <h2 id="recent-tags-heading">Recent Tags</h2>
-    <div class="recent-tag-cloud">
-      {recentTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
-    </div>
-  </aside>
 </div>
 
 <script>
