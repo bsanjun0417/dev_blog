@@ -20,6 +20,7 @@ interface Props {
 
 const { post, compact = false, list = false } = Astro.props;
 const postPath = getPostPath(post);
+const coverPath = post.data.cover ? withBasePath(post.data.cover) : undefined;
 
 // compact 또는 list 모드일 때 최대 3개 태그를 보여준다.
 const visibleTags = compact || list ? post.data.tags.slice(0, 3) : [];
@@ -55,8 +56,8 @@ const visibleTags = compact || list ? post.data.tags.slice(0, 3) : [];
   {/* 썸네일 (compact 제외) */}
   {!compact && (
     <a class="post-thumbnail" href={postPath} aria-label={post.data.title}>
-      {post.data.cover ? (
-        <img src={post.data.cover.src} alt="" loading="lazy" />
+      {coverPath ? (
+        <img src={coverPath} alt="" loading="lazy" />
       ) : (
         <span>{categoryLabels[post.data.category]}</span>
       )}

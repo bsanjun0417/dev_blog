@@ -24,13 +24,14 @@ const categoryKeys = Array.from(new Set(categories.map((c) => c.key))) as [
 
 const posts = defineCollection({
   type: "content",
-  schema: ({ image }) =>
+  schema: () =>
     z.object({
       title: z.string(),
       description: z.string(),
       date: z.coerce.date(),
       category: z.enum(categoryKeys),
-      cover: image().optional(),
+      // 대표 이미지는 public/uploads 경로를 그대로 사용한다.
+      cover: z.string().optional(),
       tags: z.array(z.string()).default([]),
       draft: z.boolean().default(false),
     }),

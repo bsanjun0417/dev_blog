@@ -7,6 +7,9 @@ const posts = await getPublishedPosts();
 const latestPosts = posts.slice(0, 3);
 const featuredPost = latestPosts[0];
 const mascotImage = withBasePath("/images/san2blog-it-mascot.png");
+const featuredCover = featuredPost?.data.cover
+  ? withBasePath(featuredPost.data.cover)
+  : undefined;
 ---
 
 <Layout>
@@ -32,8 +35,8 @@ const mascotImage = withBasePath("/images/san2blog-it-mascot.png");
 
     {featuredPost && (
       <a class="featured-visual" href={getPostPath(featuredPost)} aria-label={featuredPost.data.title}>
-        {featuredPost.data.cover ? (
-          <img src={featuredPost.data.cover.src} alt="" loading="eager" />
+        {featuredCover ? (
+          <img src={featuredCover} alt="" loading="eager" />
         ) : (
           <div class="featured-cover" aria-hidden="true">
             <span>{categoryLabels[featuredPost.data.category]}</span>

@@ -3,7 +3,7 @@ title: "노트북 블로그글1"
 description: "테스트용 블로그글"
 date: "2026-05-25"
 category: "project"
-cover: "./screenshot-01.png"
+cover: "/uploads/blog12/screenshot-01.png"
 tags: ["db", "노트북 관리", "그램"]
 draft: false
 ---
