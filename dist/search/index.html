@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="ko"> <head><meta charset="UTF-8"><meta name="description" content="블로그 검색"><meta name="viewport" content="width=device-width"><meta name="generator" content="Astro v5.18.1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="san2blog RSS" href="https://blog.san2blog.com/rss.xml"><title>Search | san2blog</title><script>
+      // 첫 렌더링 전에 저장된 선택값 또는 OS 설정을 적용해 화면 깜빡임을 막습니다.
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const theme = savedTheme === "dark" || savedTheme === "light"
+          ? savedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script><link rel="stylesheet" href="/_astro/about.Cgu_Y4Mm.css"></head> <body> <header class="site-header"> <a class="brand" href="/"> <span class="brand-mark" aria-hidden="true">S</span> <span>san2blog</span> </a> <div class="header-actions"> <nav class="desktop-nav" aria-label="주요 내비게이션"> <a href="/docs"> Docs </a><a href="/posts"> Posts </a><a href="/about"> About </a> </nav> <button class="icon-button theme-toggle" type="button" aria-label="다크 모드로 변경" aria-pressed="false"> <svg class="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path> </svg> <svg class="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24"> <path d="M20.5 14.8A8.5 8.5 0 0 1 9.2 3.5 8.5 8.5 0 1 0 20.5 14.8Z"></path> </svg> </button> <button class="icon-button search-toggle" type="button" aria-label="검색 열기" aria-expanded="false" aria-controls="site-search-overlay"> <svg aria-hidden="true" viewBox="0 0 24 24"> <path d="m21 21-4.3-4.3"></path> <circle cx="11" cy="11" r="7"></circle> </svg> </button> <details class="mobile-nav"> <summary aria-label="메뉴 열기">Menu</summary> <nav aria-label="모바일 내비게이션"> <a href="/docs"> Docs </a><a href="/posts"> Posts </a><a href="/about"> About </a> </nav> </details> </div> </header> <div id="site-search-overlay" class="search-overlay" hidden> <div class="search-overlay-bar"> <a class="search-overlay-brand" href="/"> <span class="brand-mark" aria-hidden="true">S</span> <span>san2blog</span> </a> <button class="search-close" type="button" aria-label="검색 닫기">×</button> </div> <form class="overlay-search-form" action="/search" method="get" role="search"> <label class="sr-only" for="site-search-input">블로그 검색</label> <input id="site-search-input" name="q" type="search" placeholder="제목, 태그 검색" autocomplete="off"> </form> <div class="search-suggestions" aria-label="최근 글"> <a class="search-suggestion" href="/posts/blog12"> <strong>노트북 블로그글1</strong> <small>테스트용 블로그글</small> </a> </div> </div> <script type="module">const n=document.querySelector("#site-search-overlay"),c=document.querySelector(".search-toggle"),o=document.querySelector(".search-close"),a=document.querySelector("#site-search-input"),t=document.querySelector(".theme-toggle");function r(){if(!(t instanceof HTMLButtonElement))return;const e=document.documentElement.dataset.theme==="dark";t.setAttribute("aria-pressed",String(e)),t.setAttribute("aria-label",e?"라이트 모드로 변경":"다크 모드로 변경")}function i(){n instanceof HTMLElement&&(n.hidden=!1,document.body.classList.add("search-open"),c?.setAttribute("aria-expanded","true"),window.setTimeout(()=>{a instanceof HTMLInputElement&&a.focus()},30))}function s(){n instanceof HTMLElement&&(n.hidden=!0,document.body.classList.remove("search-open"),c?.setAttribute("aria-expanded","false"))}c instanceof HTMLButtonElement&&c.addEventListener("click",i);o instanceof HTMLButtonElement&&o.addEventListener("click",s);t instanceof HTMLButtonElement&&(r(),t.addEventListener("click",()=>{const e=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=e;try{localStorage.setItem("theme",e)}catch{}r()}));document.addEventListener("keydown",e=>{e.key==="Escape"&&s()});</script> <main>  <section class="page-hero section search-hero"> <p class="section-label">Search</p> <h1>검색</h1> <p>제목, 본문, 태그 기준으로 글을 찾습니다.</p> </section> <section class="section search-panel"> <link href="/pagefind/pagefind-ui.css" rel="stylesheet"> <div id="search"></div> <noscript>검색 기능을 사용하려면 JavaScript가 필요합니다.</noscript> <script>(function(){const pagefindJs = "/pagefind/pagefind-ui.js";
+const pagefindBundlePath = "/pagefind/";
+
+      const target = document.querySelector("#search");
+      const params = new URLSearchParams(window.location.search);
+      const initialQuery = params.get("q")?.trim() ?? "";
+
+      import(pagefindJs)
+        .then(({ PagefindUI }) => {
+          const search = new PagefindUI({
+            element: "#search",
+            bundlePath: pagefindBundlePath,
+            showImages: false,
+            showSubResults: true
+          });
+
+          // 헤더 검색으로 전달된 q 값을 Pagefind에 직접 전달합니다.
+          if (initialQuery) {
+            search.triggerSearch(initialQuery);
+          }
+        })
+        .catch(() => {
+          if (target) {
+            target.innerHTML =
+              "<p class=\"search-empty\">검색은 <code>npm.cmd run build</code> 후 <code>npm.cmd run preview</code>에서 동작합니다.</p>";
+          }
+        });
+    })();</script> </section>  </main> <footer class="site-footer"> <p>개발 기록과 개인 메모를 조용히 쌓아두는 공간입니다.</p> <nav aria-label="푸터 링크"> <a href="/rss.xml">RSS</a> <a href="https://github.com/san2blog" rel="noreferrer">GitHub</a> </nav> </footer> </body></html>
