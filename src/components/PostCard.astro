@@ -1,0 +1,72 @@
+---
+/**
+ * PostCard.astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * 게시글 카드 컴포넌트. 세 가지 표시 모드를 지원한다.
+ *
+ *  - 기본 (default): 썸네일 + 카테고리/날짜 메타 + 제목 + 설명 (카테고리 목록 등)
+ *  - list:           날짜/태그 + 제목 + 설명 + 작은 썸네일 (Posts 아카이브 목록)
+ *  - compact:        제목 + 태그만 인라인으로 표시 (홈 화면 최근 글)
+ */
+import { categoryLabels, formatDate, getPostPath, withBasePath, type Post } from "@lib/posts";
+
+interface Props {
+  post: Post;
+  /** 홈 화면 최근 글 영역에서 사용하는 경량 표시 모드 */
+  compact?: boolean;
+  /** Posts 아카이브 목록에서 사용하는 리스트 표시 모드 */
+  list?: boolean;
+}
+
+const { post, compact = false, list = false } = Astro.props;
+const postPath = getPostPath(post);
+
+// compact 또는 list 모드일 때 최대 3개 태그를 보여준다.
+const visibleTags = compact || list ? post.data.tags.slice(0, 3) : [];
+---
+
+<article class:list={["post-card", { "post-card-compact": compact, "post-card-list": list }]}>
+  <div class="post-card-main">
+    {list ? (
+      <div class="post-list-meta">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+        {visibleTags.length > 0 && (
+          <div class="post-list-keywords" aria-label="키워드">
+            {visibleTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
+          </div>
+        )}
+      </div>
+    ) : !compact && (
+      <div class="post-meta">
+        <a href={withBasePath(`/categories/${post.data.category}`)}>
+          {categoryLabels[post.data.category]}
+        </a>
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      </div>
+    )}
+
+    {/* 제목 */}
+    <h2><a href={postPath}>{post.data.title}</a></h2>
+
+    {/* 설명 (compact 제외) */}
+    {!compact && <p>{post.data.description}</p>}
+  </div>
+
+  {/* 썸네일 (compact 제외) */}
+  {!compact && (
+    <a class="post-thumbnail" href={postPath} aria-label={post.data.title}>
+      {post.data.cover ? (
+        <img src={post.data.cover.src} alt="" loading="lazy" />
+      ) : (
+        <span>{categoryLabels[post.data.category]}</span>
+      )}
+    </a>
+  )}
+
+  {/* compact 모드에서만 태그 표시 */}
+  {compact && visibleTags.length > 0 && (
+    <div class:list={["tag-row", { "compact-tag-row": compact }]} aria-label="태그">
+      {visibleTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
+    </div>
+  )}
+</article>

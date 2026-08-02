@@ -1,0 +1,64 @@
+---
+/**
+ * Layout.astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * 사이트 공통 레이아웃.
+ * 모든 페이지가 이 레이아웃을 상속해 Header / Footer 를 공유한다.
+ *
+ * Props:
+ *  title       - <title> 태그. 기본값 "san2blog"
+ *  description - meta description. 기본값은 블로그 소개 문구
+ */
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import { withBasePath } from "@lib/posts";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "san2blog",
+  description = "개발 기록, 영어 메모, 프로젝트를 정리하는 개인 블로그입니다."
+} = Astro.props;
+
+// 홈 타이틀은 그대로, 나머지는 "페이지명 | san2blog" 형식
+const pageTitle = title === "san2blog" ? title : `${title} | san2blog`;
+
+// RSS 피드 절대 URL (Astro.site 기준)
+const rssUrl = new URL(withBasePath("rss.xml"), Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={withBasePath("favicon.svg")} />
+    <link rel="alternate" type="application/rss+xml" title="san2blog RSS" href={rssUrl} />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      // 첫 렌더링 전에 저장된 선택값 또는 OS 설정을 적용해 화면 깜빡임을 막습니다.
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const theme = savedTheme === "dark" || savedTheme === "light"
+          ? savedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,224 @@
+---
+/**
+ * PostsArchive.astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * Posts 아카이브 레이아웃 컴포넌트.
+ * /posts 와 /posts/page/:n 에서 공유한다.
+ *
+ * 레이아웃 구성 (데스크톱 기준):
+ *  ┌──────────────┬──────────────────────┬──────────────┐
+ *  │ 카테고리 패널 │     게시글 목록       │ Recent Tags  │
+ *  │ (사이드바)    │  + 페이지네이션       │ (사이드바)    │
+ *  └──────────────┴──────────────────────┴──────────────┘
+ *
+ * 모바일에서는 카테고리 패널이 팝업 드롭다운으로 변환된다.
+ */
+import PostCard from "@components/PostCard.astro";
+import { withBasePath } from "@lib/posts";
+import type { Post } from "@lib/posts";
+
+// ────────────────────────────────────────────────
+// 타입
+// ────────────────────────────────────────────────
+
+/** getCategoryTree() 반환값의 단일 항목 타입 */
+interface CategoryNode {
+  key: Post["data"]["category"];
+  label: string;
+  count: number;
+  subcategories: {
+    key: string;
+    label: string;
+    count: number;
+  }[];
+}
+
+interface Props {
+  posts: Post[];
+  categories: CategoryNode[];
+  recentTags: string[];
+  currentPage: number;
+  pageCount: number;
+}
+
+const { posts, categories, recentTags, currentPage, pageCount } = Astro.props;
+
+// 페이지 번호 배열 생성 (1, 2, 3 …)
+const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+
+/** 페이지 번호 → 실제 URL 변환. 1페이지는 /posts, 나머지는 /posts/page/:n */
+const getPageHref = (page: number) =>
+  withBasePath(page === 1 ? "/posts" : `/posts/page/${page}`);
+
+// 처음으로 글이 있는 카테고리를 기본 펼침 상태로 설정한다.
+const openCategoryIndex = Math.max(
+  0,
+  categories.findIndex((c) => c.count > 0),
+);
+---
+
+<div class="posts-layout">
+  {/* ── 카테고리 사이드바 ── */}
+  <section class="category-panel" aria-labelledby="category-heading">
+    {/* 모바일 전용 토글 버튼 */}
+    <button
+      class="category-popup-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="category-popup-content"
+    >
+      <span class="category-toggle-icon" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span>
+        <small>Categories</small>
+        <strong>카테고리</strong>
+      </span>
+    </button>
+
+    {/* 카테고리 목록 패널 */}
+    <div id="category-popup-content" class="category-panel-content">
+      <div class="category-panel-heading">
+        <p class="section-label">Categories</p>
+        <h2 id="category-heading">카테고리</h2>
+      </div>
+
+      <div class="category-tree">
+        {
+          categories.map((category, index) => (
+            <details class="category-branch" open={index === openCategoryIndex}>
+              <summary>
+                <span>{category.label}</span>
+                <small>{category.count}</small>
+              </summary>
+
+              <div class="subcategory-list">
+                <div>
+                  {/* 전체 보기 링크 */}
+                  <a
+                    class="subcategory-all"
+                    href={withBasePath(`/categories/${category.key}`)}
+                  >
+                    <span>전체 보기</span>
+                    <small>{category.count}</small>
+                  </a>
+
+                  {/* 하위 카테고리 목록 */}
+                  {category.subcategories.length > 0 ? (
+                    category.subcategories.map((subcategory) => (
+                      <a href={withBasePath(`/tags/${subcategory.key}`)}>
+                        <span>#{subcategory.label}</span>
+                        <small>{subcategory.count}</small>
+                      </a>
+                    ))
+                  ) : (
+                    <span class="subcategory-empty">
+                      아직 하위 주제가 없습니다.
+                    </span>
+                  )}
+                </div>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ── 게시글 목록 ── */}
+  <section class="post-list posts-paged-list" aria-label="글 목록">
+    {posts.map((post) => <PostCard post={post} list />)}
+  </section>
+
+  {/* ── 페이지네이션 ── */}
+  <nav class="pagination" aria-label="페이지네이션">
+    {
+      currentPage > 1 ? (
+        <a class="pagination-edge" href={getPageHref(currentPage - 1)}>
+          이전
+        </a>
+      ) : (
+        <span class="pagination-edge is-disabled">이전</span>
+      )
+    }
+
+    <div class="pagination-pages">
+      {
+        pages.map((page) => (
+          <a
+            href={getPageHref(page)}
+            aria-current={page === currentPage ? "page" : undefined}
+          >
+            {page}
+          </a>
+        ))
+      }
+    </div>
+
+    {
+      currentPage < pageCount ? (
+        <a class="pagination-edge" href={getPageHref(currentPage + 1)}>
+          다음
+        </a>
+      ) : (
+        <span class="pagination-edge is-disabled">다음</span>
+      )
+    }
+  </nav>
+
+  {/* ── Recent Tags 사이드바 ── */}
+  <aside class="recent-tags-sidebar" aria-labelledby="recent-tags-heading">
+    <h2 id="recent-tags-heading">Recent Tags</h2>
+    <div class="recent-tag-cloud">
+      {recentTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
+    </div>
+  </aside>
+</div>
+
+<script>
+  /**
+   * 카테고리 패널 팝업 토글 (모바일 전용).
+   * 패널 외부 클릭 또는 Escape 키로 닫힌다.
+   */
+  const categoryPanel = document.querySelector(".category-panel");
+  const categoryToggle = document.querySelector(".category-popup-toggle");
+  const categoryContent = document.querySelector("#category-popup-content");
+
+  function closeCategoryPopup() {
+    categoryPanel?.classList.remove("is-open");
+    categoryToggle?.setAttribute("aria-expanded", "false");
+  }
+
+  if (
+    categoryToggle instanceof HTMLButtonElement &&
+    categoryPanel instanceof HTMLElement
+  ) {
+    // 토글 버튼 클릭 시 열기/닫기
+    categoryToggle.addEventListener("click", () => {
+      const isOpen = categoryPanel.classList.toggle("is-open");
+      categoryToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    // 패널 외부 클릭 시 닫기
+    document.addEventListener("click", (event) => {
+      if (
+        !(event.target instanceof Node) ||
+        categoryPanel.contains(event.target)
+      )
+        return;
+      closeCategoryPopup();
+    });
+
+    // Escape 키 닫기
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCategoryPopup();
+    });
+  }
+
+  // 카테고리 링크 클릭 시 팝업 닫기
+  categoryContent?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeCategoryPopup);
+  });
+</script>

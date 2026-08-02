@@ -1,0 +1,295 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { withBasePath } from "@lib/posts";
+import { docs, type Doc } from "../../data/docs";
+
+export function getStaticPaths() {
+  return docs.map((doc) => ({ params: { slug: doc.slug }, props: { doc } }));
+}
+
+interface Props {
+  doc: Doc;
+}
+
+const { doc } = Astro.props;
+const groups = [...new Set(doc.sections.map((section) => section.group))];
+---
+
+<Layout title={`${doc.title} 문서`} description={doc.summary}>
+  <div class="docs-shell">
+    <aside class="docs-sidebar" aria-label="문서 메뉴">
+      <a class="docs-mode" href={withBasePath("/docs")}>
+        <span class="docs-mode-icon" aria-hidden="true">D</span>
+        <span>
+          <strong>{doc.modeTitle}</strong>
+          <small>{doc.modeLabel}</small>
+        </span>
+      </a>
+
+      <nav class="docs-menu">
+        {groups.map((group) => (
+          <div class="docs-menu-group">
+            <strong>{group}</strong>
+            {doc.sections
+              .filter((section) => section.group === group)
+              .map((section) => (
+                <a href={`#${section.id}`} data-doc-link={section.id}>{section.title}</a>
+              ))}
+          </div>
+        ))}
+      </nav>
+    </aside>
+
+    <article class="docs-content">
+      <header class="docs-hero">
+        <a class="docs-back" href={withBasePath("/docs")}>문서 목록</a>
+        <p class="section-label">Documentation</p>
+        <h1>{doc.modeTitle}</h1>
+        <p>{doc.summary}</p>
+      </header>
+
+      {doc.sections.map((section) => (
+        <section class="docs-section reveal" id={section.id}>
+          <p class="docs-eyebrow">{section.eyebrow}</p>
+          <h2>{section.title}</h2>
+          <p class="docs-lead">{section.lead}</p>
+          {section.body.map((paragraph) => <p>{paragraph}</p>)}
+        </section>
+      ))}
+    </article>
+  </div>
+
+  <script>
+    const links = Array.from(document.querySelectorAll("[data-doc-link]"));
+    const sections = Array.from(document.querySelectorAll(".docs-section"));
+
+    const setActive = (id: string) => {
+      for (const link of links) {
+        link.toggleAttribute("aria-current", link.getAttribute("data-doc-link") === id);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target?.id) setActive(visible.target.id);
+      },
+      { rootMargin: "-18% 0px -62% 0px", threshold: [0.1, 0.35, 0.7] }
+    );
+
+    for (const section of sections) observer.observe(section);
+
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.12 }
+    );
+
+    for (const section of sections) revealObserver.observe(section);
+  </script>
+</Layout>
+
+<style>
+  :global(main) {
+    width: 100%;
+  }
+
+  .docs-shell {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 960px);
+    gap: clamp(34px, 5vw, 72px);
+    justify-content: center;
+    width: min(1280px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 70px 0 88px;
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+  }
+
+  .docs-mode {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.62);
+  }
+
+  .docs-mode-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 8px;
+    color: #f8fafc;
+    background: #111827;
+    font-weight: 850;
+  }
+
+  .docs-mode strong,
+  .docs-mode small {
+    display: block;
+    line-height: 1.25;
+  }
+
+  .docs-mode small {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .docs-menu {
+    display: grid;
+    gap: 24px;
+    margin-top: 28px;
+    max-height: calc(100vh - 190px);
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  .docs-menu-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  .docs-menu-group strong {
+    color: var(--accent-strong);
+    font-size: 0.88rem;
+  }
+
+  .docs-menu a {
+    padding: 7px 9px;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+
+  .docs-menu a:hover,
+  .docs-menu a[aria-current] {
+    color: var(--text);
+    background: rgba(100, 116, 139, 0.11);
+  }
+
+  .docs-menu a[aria-current] {
+    font-weight: 760;
+    transform: translateX(2px);
+  }
+
+  .docs-content {
+    min-width: 0;
+  }
+
+  .docs-back {
+    display: inline-flex;
+    margin-bottom: 18px;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .docs-hero {
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .docs-hero h1 {
+    max-width: 900px;
+    margin: 0;
+    font-size: clamp(2.45rem, 5vw, 4.4rem);
+    line-height: 1.06;
+    letter-spacing: 0;
+  }
+
+  .docs-hero p:not(.section-label) {
+    max-width: 820px;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+
+  .docs-section {
+    scroll-margin-top: 110px;
+    padding: 68px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 420ms ease, transform 420ms ease;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .docs-eyebrow {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+  }
+
+  .docs-section h2 {
+    margin: 0 0 14px;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    line-height: 1.16;
+    letter-spacing: 0;
+  }
+
+  .docs-lead {
+    max-width: 860px;
+    color: var(--accent-strong);
+    font-size: 1.14rem;
+    font-weight: 650;
+  }
+
+  .docs-section p:not(.docs-eyebrow) {
+    max-width: 880px;
+    color: #374151;
+    font-size: 1.03rem;
+  }
+
+  @media (max-width: 860px) {
+    .docs-shell {
+      display: block;
+      width: min(100% - 24px, 960px);
+      padding-top: 38px;
+    }
+
+    .docs-sidebar {
+      position: static;
+      margin-bottom: 34px;
+    }
+
+    .docs-menu {
+      display: flex;
+      gap: 18px;
+      max-height: none;
+      overflow-x: auto;
+      padding: 0 0 8px;
+    }
+
+    .docs-menu-group {
+      min-width: 190px;
+    }
+
+    .docs-section {
+      padding: 48px 0;
+    }
+  }
+</style>

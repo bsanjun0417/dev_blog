@@ -1,0 +1,63 @@
+---
+import Layout from "@layouts/Layout.astro";
+import PostCard from "@components/PostCard.astro";
+import { categoryLabels, formatDate, getPostPath, getPublishedPosts, withBasePath } from "@lib/posts";
+
+const posts = await getPublishedPosts();
+const latestPosts = posts.slice(0, 3);
+const featuredPost = latestPosts[0];
+const mascotImage = withBasePath("/images/san2blog-it-mascot.png");
+---
+
+<Layout>
+  <section class="home-intro section">
+    <div class="home-intro-header">
+      <div class="home-intro-copy">
+        <p class="section-label">san2blog</p>
+      <h1>소소한 정리 공간</h1>
+      <p>
+        개발 공부와 자기계발, 그리고 기록해둘 것들을 정리하는 공간입니다.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href={withBasePath("/posts")}>글 목록</a>
+      </div>
+      </div>
+
+      <a class="home-mascot-link" href={withBasePath("/about")} aria-label="About">
+        <figure class="home-mascot" aria-label="san2blog IT mascot">
+          <img src={mascotImage} alt="" loading="eager" />
+        </figure>
+      </a>
+    </div>
+
+    {featuredPost && (
+      <a class="featured-visual" href={getPostPath(featuredPost)} aria-label={featuredPost.data.title}>
+        {featuredPost.data.cover ? (
+          <img src={featuredPost.data.cover.src} alt="" loading="eager" />
+        ) : (
+          <div class="featured-cover" aria-hidden="true">
+            <span>{categoryLabels[featuredPost.data.category]}</span>
+            <strong>{featuredPost.data.title}</strong>
+          </div>
+        )}
+        <div class="featured-caption">
+          <span>{formatDate(featuredPost.data.date)}</span>
+          <strong>{featuredPost.data.title}</strong>
+        </div>
+      </a>
+    )}
+  </section>
+
+  <section class="section latest-section">
+    <div class="section-heading">
+      <div>
+        <p class="section-label">Latest</p>
+        <h2>최근 글</h2>
+      </div>
+      <a class="text-link" href={withBasePath("/posts")}>전체 보기</a>
+    </div>
+    <div class="post-grid compact-posts">
+      {latestPosts.map((post) => <PostCard post={post} compact />)}
+    </div>
+  </section>
+</Layout>

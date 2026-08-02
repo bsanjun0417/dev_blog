@@ -1,0 +1,49 @@
+---
+/**
+ * [page].astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * /posts/page/2, /posts/page/3 … 형태의 페이지네이션 페이지.
+ *
+ * 주의:
+ *  - 1페이지는 /posts/index.astro 에서 별도 처리한다.
+ *  - getStaticPaths 에서 posts 를 props 로 전달해 중복 DB 조회를 방지한다.
+ */
+import Layout from "@layouts/Layout.astro";
+import PostsArchive from "@components/PostsArchive.astro";
+import {
+  getCategoryTree,
+  getPageCount,
+  getPaginatedPosts,
+  getPublishedPosts,
+  getRecentTags
+} from "@lib/posts";
+
+// 2페이지부터 마지막 페이지까지 정적 경로 생성
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const pageCount = getPageCount(posts);
+
+  // page=1 은 /posts/index.astro 가 담당하므로 2부터 시작
+  return Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+    props: { allPosts: posts }
+  }));
+}
+
+const { allPosts } = Astro.props;
+const currentPage = Number(Astro.params.page ?? "1");
+const pageCount = getPageCount(allPosts);
+const posts = getPaginatedPosts(allPosts, currentPage);
+const categories = getCategoryTree(allPosts);
+const recentTags = getRecentTags(allPosts);
+---
+
+<Layout title={`Posts ${currentPage}`} description="전체 글 목록">
+  <PostsArchive
+    posts={posts}
+    categories={categories}
+    recentTags={recentTags}
+    currentPage={currentPage}
+    pageCount={pageCount}
+  />
+</Layout>

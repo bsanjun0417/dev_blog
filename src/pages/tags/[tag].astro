@@ -1,0 +1,39 @@
+---
+/**
+ * [tag].astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * /tags/:tag 경로의 태그 필터 페이지.
+ * 공개 게시글에 등장하는 모든 태그를 기준으로 정적 경로를 생성하고,
+ * 해당 태그가 포함된 게시글만 보여준다.
+ */
+import Layout from "@layouts/Layout.astro";
+import PostCard from "@components/PostCard.astro";
+import { getAllTags, getPublishedPosts } from "@lib/posts";
+
+// 공개 게시글에서 수집한 모든 태그에 대해 정적 경로를 생성한다.
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return getAllTags(posts).map((tag) => ({ params: { tag } }));
+}
+
+const tag = Astro.params.tag;
+
+// 해당 태그를 포함한 공개 게시글만 필터링
+const posts = (await getPublishedPosts()).filter((post) =>
+  post.data.tags.includes(tag ?? "")
+);
+---
+
+<Layout title={`#${tag}`} description={`#${tag} 태그 글 목록`}>
+  {/* 페이지 헤더 */}
+  <section class="page-hero section">
+    <p class="section-label">Tag</p>
+    <h1>#{tag}</h1>
+    <p>{posts.length}개의 글이 있습니다.</p>
+  </section>
+
+  {/* 게시글 목록 */}
+  <section class="section post-list">
+    {posts.map((post) => <PostCard post={post} />)}
+  </section>
+</Layout>

@@ -1,0 +1,48 @@
+ ---
+import Layout from "@layouts/Layout.astro";
+import { withBasePath } from "@lib/posts";
+
+const pagefindCss = withBasePath("pagefind/pagefind-ui.css");
+const pagefindJs = withBasePath("pagefind/pagefind-ui.js");
+const pagefindBundlePath = withBasePath("pagefind/");
+---
+
+<Layout title="Search" description="블로그 검색">
+  <section class="page-hero section search-hero">
+    <p class="section-label">Search</p>
+    <h1>검색</h1>
+    <p>제목, 본문, 태그 기준으로 글을 찾습니다.</p>
+  </section>
+
+  <section class="section search-panel">
+    <link href={pagefindCss} rel="stylesheet" />
+    <div id="search"></div>
+    <noscript>검색 기능을 사용하려면 JavaScript가 필요합니다.</noscript>
+    <script is:inline define:vars={{ pagefindJs, pagefindBundlePath }}>
+      const target = document.querySelector("#search");
+      const params = new URLSearchParams(window.location.search);
+      const initialQuery = params.get("q")?.trim() ?? "";
+
+      import(pagefindJs)
+        .then(({ PagefindUI }) => {
+          const search = new PagefindUI({
+            element: "#search",
+            bundlePath: pagefindBundlePath,
+            showImages: false,
+            showSubResults: true
+          });
+
+          // 헤더 검색으로 전달된 q 값을 Pagefind에 직접 전달합니다.
+          if (initialQuery) {
+            search.triggerSearch(initialQuery);
+          }
+        })
+        .catch(() => {
+          if (target) {
+            target.innerHTML =
+              "<p class=\"search-empty\">검색은 <code>npm.cmd run build</code> 후 <code>npm.cmd run preview</code>에서 동작합니다.</p>";
+          }
+        });
+    </script>
+  </section>
+</Layout>

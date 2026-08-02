@@ -1,0 +1,164 @@
+---
+/**
+ * [slug].astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * 게시글 상세 페이지.
+ *
+ * 역할:
+ *  - 각 게시글 slug 에 대응하는 정적 페이지 생성 (getStaticPaths)
+ *  - 본문(Content) 렌더링
+ *  - h2/h3 기반 목차(TOC) 자동 생성
+ *  - 이전 글 / 다음 글 네비게이션
+ */
+import Layout from "@layouts/Layout.astro";
+import {
+  categoryLabels,
+  formatDate,
+  getPostPath,
+  getPublishedPosts,
+  withBasePath
+} from "@lib/posts";
+
+// 빌드 타임에 공개된 모든 게시글 slug 를 정적 경로로 등록한다.
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post, posts }   // posts 를 props 로 전달해 중복 호출 방지
+  }));
+}
+
+const { post, posts } = Astro.props;
+
+// 현재 글의 인덱스를 찾아 이전/다음 글을 결정한다 (날짜 내림차순 배열 기준).
+const currentIndex = posts.findIndex((item) => item.id === post.id);
+const newerPost = posts[currentIndex - 1]; // 더 최신 글
+const olderPost = posts[currentIndex + 1]; // 더 오래된 글
+
+// Markdown 본문과 헤딩 목록을 렌더링한다.
+const { Content, headings } = await post.render();
+
+// 목차에는 h2, h3만 포함한다.
+const tocHeadings = headings.filter(
+  (heading) => heading.depth >= 2 && heading.depth <= 3
+);
+---
+
+<Layout title={post.data.title} description={post.data.description}>
+  <article class="post-detail section" data-pagefind-body>
+    {/* 게시글 헤더: 카테고리, 날짜, 제목, 설명, 태그 */}
+    <header class="post-header">
+      <div class="post-meta">
+        <a href={withBasePath(`/categories/${post.data.category}`)}>
+          {categoryLabels[post.data.category]}
+        </a>
+        <time datetime={post.data.date.toISOString()}>
+          {formatDate(post.data.date)}
+        </time>
+      </div>
+      <h1>{post.data.title}</h1>
+      <p>{post.data.description}</p>
+      <div class="tag-row">
+        {post.data.tags.map((tag) => (
+          <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>
+        ))}
+      </div>
+    </header>
+
+    {/* 본문 + 사이드 목차 */}
+    <div class="post-shell">
+      <div class="prose">
+        <Content />
+      </div>
+
+      {tocHeadings.length > 0 && (
+        <aside class="toc" aria-label="글 목차" data-pagefind-ignore>
+          <strong>목차</strong>
+          <nav>
+            {tocHeadings.map((heading) => (
+              <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>
+                {heading.text}
+              </a>
+            ))}
+          </nav>
+        </aside>
+      )}
+    </div>
+
+    {/* 이전 글 / 다음 글 네비게이션 */}
+    <nav class="post-nav" aria-label="이전 글과 다음 글" data-pagefind-ignore>
+      {olderPost ? (
+        <a href={getPostPath(olderPost)}>
+          <span>이전 글</span>
+          {olderPost.data.title}
+        </a>
+      ) : <span></span>}
+      {newerPost ? (
+        <a href={getPostPath(newerPost)}>
+          <span>다음 글</span>
+          {newerPost.data.title}
+        </a>
+      ) : <span></span>}
+    </nav>
+  </article>
+
+  <script>
+    const languageNames: Record<string, string> = {
+      c: "C",
+      cpp: "C++",
+      cs: "C#",
+      java: "Java",
+      javascript: "JavaScript",
+      js: "JavaScript",
+      json: "JSON",
+      python: "Python",
+      py: "Python",
+      shell: "Shell",
+      sh: "Shell",
+      ts: "TypeScript",
+      typescript: "TypeScript"
+    };
+
+    // Markdown에서 생성된 모든 코드 블록에 언어와 복사 동작을 한 번만 추가한다.
+    document.querySelectorAll<HTMLPreElement>(".prose pre").forEach((pre) => {
+      const code = pre.querySelector("code");
+      const language = code?.className.match(/language-([\w+-]+)/)?.[1] ?? "text";
+      const wrapper = document.createElement("div");
+      const header = document.createElement("div");
+      const label = document.createElement("span");
+      const button = document.createElement("button");
+
+      wrapper.className = "code-block";
+      header.className = "code-block-header";
+      label.textContent = languageNames[language.toLowerCase()] ?? language;
+      button.type = "button";
+      button.className = "code-copy-button";
+      button.textContent = "복사";
+      button.setAttribute("aria-label", `${label.textContent} 코드 복사`);
+
+      button.addEventListener("click", async () => {
+        const text = code?.textContent ?? "";
+
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.append(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+
+        button.textContent = "복사됨";
+        window.setTimeout(() => { button.textContent = "복사"; }, 1600);
+      });
+
+      pre.before(wrapper);
+      header.append(label, button);
+      wrapper.append(header, pre);
+    });
+  </script>
+</Layout>

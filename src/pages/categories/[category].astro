@@ -1,0 +1,41 @@
+---
+/**
+ * [category].astro
+ * ──────────────────────────────────────────────────────────────────────────
+ * /categories/:category 경로의 카테고리 필터 페이지.
+ * categories.json 에 등록된 key 기준으로 정적 경로를 생성하고,
+ * 해당 카테고리에 속한 게시글만 보여준다.
+ */
+import Layout from "@layouts/Layout.astro";
+import PostCard from "@components/PostCard.astro";
+import { categoryLabels, getPublishedPosts, type Post } from "@lib/posts";
+
+// 등록된 카테고리 key 마다 정적 경로를 생성한다.
+export function getStaticPaths() {
+  return Object.keys(categoryLabels).map((category) => ({
+    params: { category }
+  }));
+}
+
+const category = Astro.params.category as Post["data"]["category"];
+const label = categoryLabels[category] ?? category;
+
+// 해당 카테고리에 속한 공개 게시글만 필터링
+const posts = (await getPublishedPosts()).filter(
+  (post) => post.data.category === category
+);
+---
+
+<Layout title={`${label} 글`} description={`${label} 카테고리 글 목록`}>
+  {/* 페이지 헤더 */}
+  <section class="page-hero section">
+    <p class="section-label">Category</p>
+    <h1>{label}</h1>
+    <p>{posts.length}개의 글이 있습니다.</p>
+  </section>
+
+  {/* 게시글 목록 */}
+  <section class="section post-list">
+    {posts.map((post) => <PostCard post={post} />)}
+  </section>
+</Layout>
