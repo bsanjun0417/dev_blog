@@ -31,10 +31,6 @@ jobs:
         run: npm ci
 
       - name: Build site
-        # 변수만 바꾸면 프로젝트 Pages와 커스텀 도메인 모두에 대응한다.
-        env:
-          SITE: ${{ vars.SITE || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-          BASE_PATH: ${{ vars.BASE_PATH || format('/{0}/', github.event.repository.name) }}
         run: npm run build
 
       - name: Upload artifact

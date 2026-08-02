@@ -3,23 +3,23 @@
   <channel>
     <title>san2blog</title>
     <description>개발 기록, 영어 메모, 프로젝트 노트를 정리하는 개인 블로그입니다.</description>
-    <link>https://blog.san2blog.com/dev_blog/</link>
+    <link>https://bsanjun0417.github.io/dev_blog/</link>
     <lastBuildDate>Mon, 03 Aug 2026 00:00:00 GMT</lastBuildDate>
     <language>ko-KR</language>
     
       <item>
         <title>테스트</title>
         <description>테스트용 블로그글</description>
-        <link>https://blog.san2blog.com/dev_blog/posts/test_post1</link>
-        <guid>https://blog.san2blog.com/dev_blog/posts/test_post1</guid>
+        <link>https://bsanjun0417.github.io/dev_blog/posts/test_post1</link>
+        <guid>https://bsanjun0417.github.io/dev_blog/posts/test_post1</guid>
         <pubDate>Mon, 03 Aug 2026 00:00:00 GMT</pubDate>
         <category>project</category>
       </item>
       <item>
         <title>노트북 블로그글1</title>
         <description>테스트용 블로그글</description>
-        <link>https://blog.san2blog.com/dev_blog/posts/blog12</link>
-        <guid>https://blog.san2blog.com/dev_blog/posts/blog12</guid>
+        <link>https://bsanjun0417.github.io/dev_blog/posts/blog12</link>
+        <guid>https://bsanjun0417.github.io/dev_blog/posts/blog12</guid>
         <pubDate>Mon, 25 May 2026 00:00:00 GMT</pubDate>
         <category>project</category>
       </item>
