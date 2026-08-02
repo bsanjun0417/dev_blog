@@ -8,7 +8,13 @@
  *  - list:           날짜/태그 + 제목 + 설명 + 작은 썸네일 (Posts 아카이브 목록)
  *  - compact:        제목 + 태그만 인라인으로 표시 (홈 화면 최근 글)
  */
-import { categoryLabels, formatDate, getPostPath, withBasePath, type Post } from "@lib/posts";
+import {
+  categoryLabels,
+  formatDate,
+  getPostPath,
+  withBasePath,
+  type Post,
+} from "@lib/posts";
 
 interface Props {
   post: Post;
@@ -26,25 +32,48 @@ const coverPath = post.data.cover ? withBasePath(post.data.cover) : undefined;
 const visibleTags = compact || list ? post.data.tags.slice(0, 3) : [];
 ---
 
-<article class:list={["post-card", { "post-card-compact": compact, "post-card-list": list }]}>
+<article
+  class:list={[
+    "post-card",
+    { "post-card-compact": compact, "post-card-list": list },
+  ]}
+>
   <div class="post-card-main">
-    {list ? (
-      <div class="post-list-meta">
-        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-        {visibleTags.length > 0 && (
-          <div class="post-list-keywords" aria-label="키워드">
-            {visibleTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
+    {
+      list ? (
+        <div class="post-list-meta">
+          <time datetime={post.data.date.toISOString()}>
+            {formatDate(post.data.date)}
+          </time>
+          {visibleTags.length > 0 && (
+            <div class="post-list-keywords" aria-label="키워드">
+              {visibleTags.map((tag) => (
+                <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        !compact && (
+          <div class="post-meta">
+            <a href={withBasePath(`/categories/${post.data.category}`)}>
+              {categoryLabels[post.data.category]}
+            </a>
+            <time datetime={post.data.date.toISOString()}>
+              {formatDate(post.data.date)}
+            </time>
+            <div
+              class:list={["tag-row", { "compact-tag-row": compact }]}
+              aria-label="태그"
+            >
+              {visibleTags.map((tag) => (
+                <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
-    ) : !compact && (
-      <div class="post-meta">
-        <a href={withBasePath(`/categories/${post.data.category}`)}>
-          {categoryLabels[post.data.category]}
-        </a>
-        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-      </div>
-    )}
+        )
+      )
+    }
 
     {/* 제목 */}
     <h2><a href={postPath}>{post.data.title}</a></h2>
@@ -54,20 +83,15 @@ const visibleTags = compact || list ? post.data.tags.slice(0, 3) : [];
   </div>
 
   {/* 썸네일 (compact 제외) */}
-  {!compact && (
-    <a class="post-thumbnail" href={postPath} aria-label={post.data.title}>
-      {coverPath ? (
-        <img src={coverPath} alt="" loading="lazy" />
-      ) : (
-        <span>{categoryLabels[post.data.category]}</span>
-      )}
-    </a>
-  )}
-
-  {/* compact 모드에서만 태그 표시 */}
-  {compact && visibleTags.length > 0 && (
-    <div class:list={["tag-row", { "compact-tag-row": compact }]} aria-label="태그">
-      {visibleTags.map((tag) => <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>)}
-    </div>
-  )}
+  {
+    !compact && (
+      <a class="post-thumbnail" href={postPath} aria-label={post.data.title}>
+        {coverPath ? (
+          <img src={coverPath} alt="" loading="lazy" />
+        ) : (
+          <span>{categoryLabels[post.data.category]}</span>
+        )}
+      </a>
+    )
+  }
 </article>

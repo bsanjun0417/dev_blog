@@ -55,14 +55,15 @@ const tocHeadings = headings.filter(
         <time datetime={post.data.date.toISOString()}>
           {formatDate(post.data.date)}
         </time>
-      </div>
-      <h1>{post.data.title}</h1>
-      <p>{post.data.description}</p>
-      <div class="tag-row">
+             <div class="tag-row">
         {post.data.tags.map((tag) => (
           <a href={withBasePath(`/tags/${tag}`)}>#{tag}</a>
         ))}
       </div>
+      </div>
+      <h1>{post.data.title}</h1>
+      <p>{post.data.description}</p>
+ 
     </header>
 
     {/* 본문 + 사이드 목차 */}

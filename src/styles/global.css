@@ -927,7 +927,6 @@ code {
 .chip-row {
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 18px;
 }
 
 .tag-row a,
@@ -1053,7 +1052,6 @@ code {
 
 .post-header {
   max-width: 945px;
-  margin: 0 auto 52px;
 }
 
 .post-header h1 {
