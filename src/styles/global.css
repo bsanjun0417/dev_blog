@@ -1119,11 +1119,6 @@ code {
   letter-spacing: 0;
 }
 
-.post-header p {
-  color: var(--muted);
-  font-size: 1.02rem;
-}
-
 .post-shell {
   display: grid;
   grid-template-columns: minmax(0, 720px) 180px;

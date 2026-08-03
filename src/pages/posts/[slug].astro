@@ -40,7 +40,7 @@ const { Content } = await post.render();
 
 <Layout title={post.data.title} description={post.data.description}>
   <article class="post-detail section" data-pagefind-body>
-    {/* 게시글 헤더: 카테고리, 날짜, 제목, 설명, 태그 */}
+    {/* 게시글 헤더: 카테고리, 날짜, 제목, 태그 */}
     <header class="post-header">
       <div class="post-meta">
         <a href={withBasePath(`/categories/${post.data.category}`)}>
@@ -56,7 +56,6 @@ const { Content } = await post.render();
       </div>
       </div>
       <h1>{post.data.title}</h1>
-      <p>{post.data.description}</p>
 
     </header>
 
