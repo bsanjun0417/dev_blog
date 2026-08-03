@@ -2,5 +2,9 @@
   {
     "key": "project",
     "label": "web"
+  },
+  {
+    "key": "자바",
+    "label": "jsp"
   }
 ]

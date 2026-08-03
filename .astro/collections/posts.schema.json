@@ -29,7 +29,8 @@
         "category": {
           "type": "string",
           "enum": [
-            "project"
+            "project",
+            "자바"
           ]
         },
         "cover": {
