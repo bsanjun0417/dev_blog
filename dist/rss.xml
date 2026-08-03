@@ -3,15 +3,23 @@
   <channel>
     <title>san2blog</title>
     <description>개발 기록, 영어 메모, 프로젝트 노트를 정리하는 개인 블로그입니다.</description>
-    <link>https://blog.san2blog.com/</link>
-    <lastBuildDate>Fri, 31 Jul 2026 00:00:00 GMT</lastBuildDate>
+    <link>https://bsanjun0417.github.io/dev_blog/</link>
+    <lastBuildDate>Thu, 13 Aug 2026 00:00:00 GMT</lastBuildDate>
     <language>ko-KR</language>
     
       <item>
+        <title>안뇽하세요</title>
+        <description>test</description>
+        <link>https://bsanjun0417.github.io/dev_blog/posts/five-guys-note</link>
+        <guid>https://bsanjun0417.github.io/dev_blog/posts/five-guys-note</guid>
+        <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
+        <category>ai</category>
+      </item>
+      <item>
         <title>test 8월</title>
         <description>리액트</description>
-        <link>https://blog.san2blog.com/posts/react1</link>
-        <guid>https://blog.san2blog.com/posts/react1</guid>
+        <link>https://bsanjun0417.github.io/dev_blog/posts/react1</link>
+        <guid>https://bsanjun0417.github.io/dev_blog/posts/react1</guid>
         <pubDate>Fri, 31 Jul 2026 00:00:00 GMT</pubDate>
         <category>자바</category>
       </item>

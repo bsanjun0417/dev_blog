@@ -1,7 +1,9 @@
 import { getPublishedPosts } from "@lib/posts";
+import siteConfig from "../../site.config.json";
 
-const siteUrl = process.env.SITE ?? "https://blog.san2blog.com";
-const basePath = process.env.BASE_PATH ?? "/";
+const deploymentUrl = new URL(siteConfig.url);
+const siteUrl = process.env.SITE ?? deploymentUrl.origin;
+const basePath = process.env.BASE_PATH ?? deploymentUrl.pathname;
 
 function escapeXml(value: string) {
   return value
