@@ -29,8 +29,7 @@ export const POSTS_PER_PAGE = 5;
 
 /**
  * 카테고리 key → label 매핑.
- * categories.json 에는 { key, label } 쌍이 여러 개 있을 수 있으므로
- * key 를 기준으로 처음 등장하는 label 을 대표값으로 사용한다.
+ * 같은 key의 첫 label을 상위 카테고리 표시 이름으로 사용한다.
  */
 export const categoryLabels = categories.reduce<Record<string, string>>(
   (acc, { key, label }) => {
@@ -156,6 +155,7 @@ export function getCategoryTree(posts: Post[]) {
     // 설정 파일에 등록된 하위 카테고리
     const configuredSubcategories = categories
       .filter((item) => item.key === category.key)
+      .slice(1)
       .map((item) => ({
         key: item.label,
         label: item.label,
