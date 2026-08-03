@@ -2,7 +2,7 @@
 title: "test 8월"
 description: "리액트"
 date: "2026-07-31"
-category: "project"
+category: "자바"
 tags: ["web", "react", "코딩"]
 draft: false
 ---

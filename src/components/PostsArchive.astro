@@ -90,26 +90,22 @@ const openCategoryIndex = Math.max(
           categories.map((category, index) => (
             <details class="category-branch" open={index === openCategoryIndex}>
               <summary>
-                <span>{category.label}</span>
+                <a
+                  class="category-parent-link"
+                  href={withBasePath(`/categories/${category.key}`)}
+                >
+                  {category.label}
+                </a>
                 <small>{category.count}</small>
               </summary>
 
               <div class="subcategory-list">
                 <div>
-                  {/* 전체 보기 링크 */}
-                  <a
-                    class="subcategory-all"
-                    href={withBasePath(`/categories/${category.key}`)}
-                  >
-                    <span>전체 보기</span>
-                    <small>{category.count}</small>
-                  </a>
-
                   {/* 하위 카테고리 목록 */}
                   {category.subcategories.length > 0 ? (
                     category.subcategories.map((subcategory) => (
                       <a href={withBasePath(`/tags/${subcategory.key}`)}>
-                        <span>#{subcategory.label}</span>
+                        <span>{subcategory.label}</span>
                         <small>{subcategory.count}</small>
                       </a>
                     ))

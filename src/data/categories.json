@@ -1,10 +1,26 @@
 [
   {
-    "key": "project",
-    "label": "web"
-  },
-  {
     "key": "자바",
     "label": "jsp"
+  },
+  {
+    "key": "ai",
+    "label": "ai"
+  },
+  {
+    "key": "ai",
+    "label": "클로드"
+  },
+  {
+    "key": "ai",
+    "label": "코덱스"
+  },
+  {
+    "key": "ai",
+    "label": "제미나이"
+  },
+  {
+    "key": "ai",
+    "label": "grok"
   }
 ]
