@@ -142,9 +142,7 @@ export function getCategoryCounts(
  * 카테고리 트리를 반환한다.
  * 각 카테고리 항목에 하위 카테고리(subcategories) 배열이 포함된다.
  *
- * 하위 카테고리 결정 규칙:
- *  1. categories.json 에 설정된 label 값을 우선 사용한다.
- *  2. 설정에 없는 태그는 추가로 나열한다.
+ * categories.json에 설정된 하위 카테고리만 사용한다.
  */
 export function getCategoryTree(posts: Post[]) {
   return getCategoryCounts(posts).map((category) => {
@@ -159,25 +157,14 @@ export function getCategoryTree(posts: Post[]) {
       .map((item) => ({
         key: item.label,
         label: item.label,
-        count: categoryPosts.filter((post) =>
-          post.data.tags.includes(item.label)
+        count: categoryPosts.filter(
+          (post) => post.data.subcategory === item.label
         ).length
-      }));
-
-    // 설정에 없는 태그를 추가 하위 카테고리로 포함
-    const configuredKeys = new Set(configuredSubcategories.map((s) => s.key));
-    const tagSubcategories = getAllTags(categoryPosts)
-      .filter((tag) => !configuredKeys.has(tag))
-      .map((tag) => ({
-        key: tag,
-        label: tag,
-        count: categoryPosts.filter((post) => post.data.tags.includes(tag))
-          .length
       }));
 
     return {
       ...category,
-      subcategories: [...configuredSubcategories, ...tagSubcategories]
+      subcategories: configuredSubcategories
     };
   });
 }

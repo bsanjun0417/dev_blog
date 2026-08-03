@@ -7,7 +7,7 @@
  * 역할:
  *  - 각 게시글 slug 에 대응하는 정적 페이지 생성 (getStaticPaths)
  *  - 본문(Content) 렌더링
- *  - h2/h3 기반 목차(TOC) 자동 생성
+ *  - h2 기반 목차(TOC) 자동 생성
  *  - 이전 글 / 다음 글 네비게이션
  */
 import Layout from "@layouts/Layout.astro";
@@ -35,13 +35,7 @@ const currentIndex = posts.findIndex((item) => item.id === post.id);
 const newerPost = posts[currentIndex - 1]; // 더 최신 글
 const olderPost = posts[currentIndex + 1]; // 더 오래된 글
 
-// Markdown 본문과 헤딩 목록을 렌더링한다.
-const { Content, headings } = await post.render();
-
-// 목차에는 h2, h3만 포함한다.
-const tocHeadings = headings.filter(
-  (heading) => heading.depth >= 2 && heading.depth <= 3
-);
+const { Content } = await post.render();
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
@@ -63,7 +57,7 @@ const tocHeadings = headings.filter(
       </div>
       <h1>{post.data.title}</h1>
       <p>{post.data.description}</p>
- 
+
     </header>
 
     {/* 본문 + 사이드 목차 */}
@@ -72,18 +66,10 @@ const tocHeadings = headings.filter(
         <Content />
       </div>
 
-      {tocHeadings.length > 0 && (
-        <aside class="toc" aria-label="글 목차" data-pagefind-ignore>
-          <strong>목차</strong>
-          <nav>
-            {tocHeadings.map((heading) => (
-              <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>
-                {heading.text}
-              </a>
-            ))}
-          </nav>
-        </aside>
-      )}
+      <aside class="toc" aria-label="글 목차" data-pagefind-ignore hidden>
+        <strong>목차</strong>
+        <nav></nav>
+      </aside>
     </div>
 
     {/* 이전 글 / 다음 글 네비게이션 */}
@@ -104,6 +90,19 @@ const tocHeadings = headings.filter(
   </article>
 
   <script>
+    const toc = document.querySelector<HTMLElement>(".toc");
+    const tocNav = toc?.querySelector("nav");
+
+    // Tiptap의 HTML 제목도 포함하도록 렌더링된 h2에서 목차를 만든다.
+    document.querySelectorAll<HTMLHeadingElement>(".prose h2").forEach((heading, index) => {
+      heading.id ||= `section-${index + 1}`;
+      const link = document.createElement("a");
+      link.href = `#${heading.id}`;
+      link.textContent = heading.textContent;
+      tocNav?.append(link);
+    });
+    if (toc && tocNav?.children.length) toc.hidden = false;
+
     const languageNames: Record<string, string> = {
       c: "C",
       cpp: "C++",

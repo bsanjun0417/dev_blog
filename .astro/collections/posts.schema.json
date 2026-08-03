@@ -30,8 +30,12 @@
           "type": "string",
           "enum": [
             "자바",
-            "ai"
+            "ai",
+            "ㄴㄴ"
           ]
+        },
+        "subcategory": {
+          "type": "string"
         },
         "cover": {
           "type": "string"

@@ -87,7 +87,7 @@ const openCategoryIndex = Math.max(
 
       <div class="category-tree">
         {
-          categories.map((category, index) => (
+          categories.map((category, index) => category.subcategories.length ? (
             <details class="category-branch" open={index === openCategoryIndex}>
               <summary>
                 <a
@@ -102,21 +102,25 @@ const openCategoryIndex = Math.max(
               <div class="subcategory-list">
                 <div>
                   {/* 하위 카테고리 목록 */}
-                  {category.subcategories.length > 0 ? (
-                    category.subcategories.map((subcategory) => (
-                      <a href={withBasePath(`/tags/${subcategory.key}`)}>
+                  {category.subcategories.map((subcategory) => (
+                      <a href={withBasePath(`/categories/${category.key}/${subcategory.key}`)}>
                         <span>{subcategory.label}</span>
                         <small>{subcategory.count}</small>
                       </a>
-                    ))
-                  ) : (
-                    <span class="subcategory-empty">
-                      아직 하위 주제가 없습니다.
-                    </span>
-                  )}
+                    ))}
                 </div>
               </div>
             </details>
+          ) : (
+            <div class="category-branch category-leaf">
+              <a
+                class="category-parent-link"
+                href={withBasePath(`/categories/${category.key}`)}
+              >
+                {category.label}
+              </a>
+              <small>{category.count}</small>
+            </div>
           ))
         }
       </div>

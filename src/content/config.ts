@@ -9,6 +9,7 @@
  *  description - 요약 설명
  *  date        - 작성일
  *  category    - 카테고리 key
+ *  subcategory - 하위 카테고리 이름
  *  cover       - 썸네일 이미지 경로
  *  tags        - 태그 배열
  *  draft       - 임시저장 여부
@@ -30,6 +31,7 @@ const posts = defineCollection({
       description: z.string(),
       date: z.coerce.date(),
       category: z.enum(categoryKeys),
+      subcategory: z.string().optional(),
       // 대표 이미지는 public/uploads 경로를 그대로 사용한다.
       cover: z.string().optional(),
       tags: z.array(z.string()).default([]),

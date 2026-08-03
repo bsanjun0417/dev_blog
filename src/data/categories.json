@@ -22,5 +22,9 @@
   {
     "key": "ai",
     "label": "grok"
+  },
+  {
+    "key": "ㄴㄴ",
+    "label": "ㄴㄴ"
   }
 ]

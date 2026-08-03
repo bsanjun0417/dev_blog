@@ -651,6 +651,16 @@ code {
   border-radius: 0;
 }
 
+.category-leaf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  font-weight: 780;
+}
+
 .category-branch summary {
   display: flex;
   align-items: center;
