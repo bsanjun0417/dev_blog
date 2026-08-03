@@ -254,7 +254,7 @@ main {
 
 .overlay-search-form {
   width: min(760px, 100%);
-  margin: 0 auto 84px;
+  margin: 0 auto 24px;
 }
 
 .overlay-search-form input {
@@ -274,33 +274,77 @@ main {
   color: #94a3b8;
 }
 
-.search-suggestions {
-  display: grid;
-  gap: 30px;
+.search-results-shell {
   width: min(760px, 100%);
   margin: 0 auto;
 }
 
-.search-suggestion {
-  display: block;
-  padding-bottom: 28px;
+.search-status {
+  margin: 0 0 10px;
+  color: var(--subtle);
+  font-size: 0.82rem;
+}
+
+.search-results {
+  max-height: calc(100vh - 190px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.search-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 18px;
+  align-items: center;
+  min-height: 104px;
+  padding: 15px 4px;
   border-bottom: 1px solid var(--border);
 }
 
-.search-suggestion strong {
+.search-result:hover,
+.search-result:focus-visible {
+  background: var(--bg-soft);
+}
+
+.search-result-content {
+  min-width: 0;
+}
+
+.search-result strong {
   display: block;
   color: var(--text);
-  font-size: 1.12rem;
+  font-size: 1rem;
   line-height: 1.45;
   font-weight: 760;
 }
 
-.search-suggestion small {
-  display: block;
-  margin-top: 8px;
+.search-result-description {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
   color: var(--muted);
-  font-size: 0.94rem;
-  line-height: 1.5;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.search-result-thumbnail {
+  display: grid;
+  width: 112px;
+  height: 72px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 0.72rem;
+}
+
+.search-result-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sr-only {
@@ -350,7 +394,7 @@ main {
 
 .home-intro {
   min-height: 420px;
-  padding-top: 86px;
+  padding-top: 40px;
   padding-bottom: 24px;
 }
 
@@ -1317,7 +1361,6 @@ code {
 .site-footer {
   justify-content: space-between;
   gap: 16px;
-  padding: 40px 0 56px;
   color: var(--subtle);
 }
 
@@ -1361,11 +1404,17 @@ code {
   }
 
   .overlay-search-form {
-    margin-bottom: 48px;
+    margin-bottom: 18px;
   }
 
-  .search-suggestion {
-    padding-bottom: 22px;
+  .search-result {
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 12px;
+  }
+
+  .search-result-thumbnail {
+    width: 96px;
+    height: 64px;
   }
 
   .hero,

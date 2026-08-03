@@ -11,7 +11,12 @@
  *  - 모바일 햄버거 메뉴 (<details>)
  *  - 전체화면 검색 오버레이
  */
-import { getPostPath, getPublishedPosts, withBasePath } from "@lib/posts";
+import {
+  categoryLabels,
+  getPostPath,
+  getPublishedPosts,
+  withBasePath,
+} from "@lib/posts";
 
 const navItems = [
   { path: "/docs", label: "Docs" },
@@ -25,7 +30,20 @@ const currentPath =
     .replace(new RegExp(`^${basePath}`), "")
     .replace(/\/$/, "") || "/";
 
-const searchPosts = (await getPublishedPosts()).slice(0, 3);
+const searchPosts = await getPublishedPosts();
+const searchIndex = searchPosts.map((post) => ({
+  url: getPostPath(post),
+  title: post.data.title,
+  description: post.data.description,
+  cover: post.data.cover ? withBasePath(post.data.cover) : "",
+  category: categoryLabels[post.data.category],
+  searchText: [
+    post.data.title,
+    post.data.description,
+    ...post.data.tags,
+  ].join(" ").toLocaleLowerCase("ko-KR"),
+}));
+const pagefindJs = withBasePath("pagefind/pagefind.js");
 
 function isActive(href: string): boolean {
   return currentPath === href || currentPath.startsWith(`${href}/`);
@@ -94,7 +112,13 @@ function isActive(href: string): boolean {
   </div>
 </header>
 
-<div id="site-search-overlay" class="search-overlay" hidden>
+<div
+  id="site-search-overlay"
+  class="search-overlay"
+  data-search-index={JSON.stringify(searchIndex)}
+  data-pagefind-js={pagefindJs}
+  hidden
+>
   <div class="search-overlay-bar">
     <a class="search-overlay-brand" href={withBasePath("/")}>
       <span class="brand-mark" aria-hidden="true">S</span>
@@ -114,13 +138,11 @@ function isActive(href: string): boolean {
     />
   </form>
 
-  <div class="search-suggestions" aria-label="최근 글">
-    {searchPosts.map((post) => (
-      <a class="search-suggestion" href={getPostPath(post)}>
-        <strong>{post.data.title}</strong>
-        <small>{post.data.description}</small>
-      </a>
-    ))}
+  <div class="search-results-shell">
+    <p class="search-status" role="status" aria-live="polite">
+      검색어를 입력하세요.
+    </p>
+    <div class="search-results" aria-label="검색 결과"></div>
   </div>
 </div>
 
@@ -134,7 +156,128 @@ function isActive(href: string): boolean {
   const searchToggle  = document.querySelector(".search-toggle");
   const searchClose   = document.querySelector(".search-close");
   const searchInput   = document.querySelector("#site-search-input");
+  const searchForm    = document.querySelector(".overlay-search-form");
+  const searchStatus  = document.querySelector(".search-status");
+  const searchResults = document.querySelector(".search-results");
   const themeToggle   = document.querySelector(".theme-toggle");
+  type SearchPost = {
+    url: string;
+    title: string;
+    description: string;
+    cover: string;
+    category: string;
+    searchText: string;
+  };
+  const searchIndex = searchOverlay instanceof HTMLElement
+    ? JSON.parse(searchOverlay.dataset.searchIndex ?? "[]") as SearchPost[]
+    : [];
+  const pagefindPath = searchOverlay instanceof HTMLElement
+    ? searchOverlay.dataset.pagefindJs ?? ""
+    : "";
+  const normalizePath = (value: string) => {
+    try {
+      return decodeURI(new URL(value, window.location.origin).pathname).replace(/\/$/, "");
+    } catch {
+      return value.replace(/\/$/, "");
+    }
+  };
+  const postsByPath = new Map(
+    searchIndex.map((post) => [normalizePath(post.url), post]),
+  );
+  let pagefind: {
+    search: (query: string) => Promise<{
+      results: { data: () => Promise<{ url: string }> }[];
+    }>;
+  } | undefined;
+  let pagefindUnavailable = false;
+  let searchTimer: number | undefined;
+  let searchVersion = 0;
+
+  function renderSearchResults(posts: SearchPost[]) {
+    if (!(searchResults instanceof HTMLElement)) return;
+    searchResults.replaceChildren();
+
+    posts.forEach((post) => {
+      const link = document.createElement("a");
+      const content = document.createElement("span");
+      const title = document.createElement("strong");
+      const description = document.createElement("span");
+      const thumbnail = document.createElement("span");
+
+      link.className = "search-result";
+      link.href = post.url;
+      content.className = "search-result-content";
+      title.textContent = post.title;
+      description.className = "search-result-description";
+      description.textContent = post.description;
+      thumbnail.className = "search-result-thumbnail";
+
+      if (post.cover) {
+        const image = document.createElement("img");
+        image.src = post.cover;
+        image.alt = "";
+        image.loading = "lazy";
+        thumbnail.append(image);
+      } else {
+        thumbnail.textContent = post.category;
+      }
+
+      content.append(title, description);
+      link.append(content, thumbnail);
+      searchResults.append(link);
+    });
+  }
+
+  function fallbackSearch(query: string) {
+    const tokens = query.toLocaleLowerCase("ko-KR").split(/\s+/).filter(Boolean);
+    return searchIndex.filter((post) =>
+      tokens.every((token) => post.searchText.includes(token)),
+    );
+  }
+
+  async function searchPosts(query: string) {
+    if (!pagefindUnavailable) {
+      try {
+        if (!pagefindPath) throw new Error("Pagefind path is missing");
+        const engine = pagefind ??= await import(pagefindPath);
+        const response = await engine.search(query);
+        const results = await Promise.all(
+          response.results.map(
+            (result: { data: () => Promise<{ url: string }> }) => result.data(),
+          ),
+        );
+        return results
+          .map((result) => postsByPath.get(normalizePath(result.url)))
+          .filter((post): post is SearchPost => post !== undefined);
+      } catch {
+        pagefindUnavailable = true;
+      }
+    }
+    return fallbackSearch(query);
+  }
+
+  async function runSearch() {
+    if (!(searchInput instanceof HTMLInputElement)) return;
+    const query = searchInput.value.trim();
+    const version = ++searchVersion;
+
+    if (!query) {
+      renderSearchResults([]);
+      if (searchStatus) searchStatus.textContent = "검색어를 입력하세요.";
+      return;
+    }
+
+    if (searchStatus) searchStatus.textContent = "검색 중…";
+    const posts = await searchPosts(query);
+    if (version !== searchVersion) return;
+
+    renderSearchResults(posts);
+    if (searchStatus) {
+      searchStatus.textContent = posts.length
+        ? `${posts.length}개의 글을 찾았습니다.`
+        : "검색 결과가 없습니다.";
+    }
+  }
 
   function updateThemeToggle() {
     if (!(themeToggle instanceof HTMLButtonElement)) return;
@@ -166,6 +309,19 @@ function isActive(href: string): boolean {
   }
   if (searchClose instanceof HTMLButtonElement) {
     searchClose.addEventListener("click", closeSearchOverlay);
+  }
+  if (searchInput instanceof HTMLInputElement) {
+    searchInput.addEventListener("input", () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(runSearch, 200);
+    });
+  }
+  if (searchForm instanceof HTMLFormElement) {
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      window.clearTimeout(searchTimer);
+      runSearch();
+    });
   }
   if (themeToggle instanceof HTMLButtonElement) {
     updateThemeToggle();
